@@ -8,7 +8,7 @@
 - I have developed this as part of the 48-Hour coding challenge. I used Javascript as my programming language.
 - I used jsdom npm package for parsing the response of the fetch and isomorphic-fetch to fetch the data from the URL.
 
--I also used regular expressions to get rid of data which I don't need.
+- I also used regular expressions to get rid of data which I don't need.
 
   
 
