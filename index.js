@@ -2,48 +2,72 @@ const fetch = require(`isomorphic-fetch`);
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
-const url = 'https://www.amazon.com/AmazonBasics-DisplayPort-Display-Adapter-Cable/dp/B0134V29UA/ref=pb_d_jfyfob_3?pd_rd_w=AlXPJ&pf_rd_p=6796bd25-a33e-41f8-bc5e-d4f57bc3acd8&pf_rd_r=0G4SG02HACS2NWT3NJ0D&pd_rd_r=f422442d-476f-40c5-8f9f-05c33d96ebed&pd_rd_wg=vduTt&pd_rd_i=B01EN1PI8K&psc=1';
+// const url = `https://www.rei.com/blog/camp/how-to-introduce-your-indoorsy-friend-to-the-outdoors/`;
 
 (async () => {
+    let result = [];
     try{
-        const response = await fetch(url)
-        .then(res => {
-            return res;
-        })
-        .catch(err => {
-            throw new Error(err);
-        })
+        const response = await fetch(`https://www.rei.com/blog/camp/how-to-introduce-your-indoorsy-friend-to-the-outdoors/`)
+            .then(res => {
+                console.log(`res: `,res)
+                return res;
+            })
+            .catch(err => {
+                throw new Error(err);
+            });
         const text = await response.text();
         const dom = await new JSDOM(text);
         let h1Array = regexMatch(removeSingleElements(dom.window.document.querySelector("h1").textContent.replace(/\s+/g, " ").trim().split(" ")));
-        let ulArray = regexMatch(removeSingleElements(dom.window.document.querySelector("ul").textContent.replace(/\s+/g, " ").trim().split(" ")));
-        let freq_words = {};
-        for(h1word in h1Array) {
-            freq_words[h1Array[h1word]] = 0;
-            for(ulword in ulArray) {
-                if(ulArray[ulword].toLowerCase().includes(h1Array[h1word].toLowerCase())) {
-                    freq_words[h1Array[h1word]] += 1;
-                }
-            }
-        }
-        console.log(`freq_words: `,filterObject(freq_words));
         let contentArray = regexMatch(removeSingleElements(dom.window.document.querySelector("body").textContent.replace(/\s+/g, " ").trim().split(" ")));
 
-        let dom_freq = {};
-        for(word in h1Array) {
-            dom_freq[h1Array[word]] = 0;
-            for(domWord in contentArray) {
-                if(contentArray[domWord].toLowerCase().includes(h1Array[word].toLowerCase())) {
-                    dom_freq[h1Array[word]] += 1;
+        //Amazon articles
+        if(contentArray.length > 2500) {
+            let dom_freq = {};
+            for(word in h1Array) {
+                dom_freq[h1Array[word]] = 0;
+                for(domWord in contentArray) {
+                    if(contentArray[domWord].toLowerCase().includes(h1Array[word].toLowerCase())) {
+                        dom_freq[h1Array[word]] += 1;
+                    }
                 }
             }
+            // console.log(`Frequency of Words:`,filterObject(dom_freq))
+            for (let word in filterObject(dom_freq)) {
+                result.push(word);
+            }
+            result.sort(function(a, b) {
+                return b[1] - a[1];
+            });
+            return result;
         }
-        console.log(filterObject(dom_freq))
+        //All other articles
+        else {
+            let testDom = {};
+            for(word1 in contentArray) {
+                testDom[contentArray[word1].toLowerCase()] = 0;
+                for(word2 in contentArray) {
+                    if(contentArray[word2].toLowerCase().includes(contentArray[word1].toLowerCase()) 
+                        || contentArray[word1].toLowerCase().includes(contentArray[word2].toLowerCase()) ) {
+                            testDom[contentArray[word1].toLowerCase()] += 1;
+                    }
+                }
+            }
+            // console.log(`Frequency of Words: `,filterContentDOMObject(testDom))
+            for (let word in filterContentDOMObject(testDom)) {
+                result.push(word);
+            }
+            result.sort(function(a, b) {
+                return b[1] - a[1];
+            });
+            console.log(`result: `,result);
+            return result;
+
+        }
     }
     catch(err) {
-        console.log(`Some error occured: `,err)
+        console.log(`Some error occurred: `,err)
     }
-  })()
+})();
 
 function removeSingleElements (array) {
     let result = array.filter(item => {
@@ -55,9 +79,9 @@ function removeSingleElements (array) {
 }
 
 function regexMatch(array) {
-    let articles = [`a`, `an`, `with`, `the`, `is`, `for`, `and`, `in`, `if`, `be`, `to`, `too`, `var`, `try`, `function`, `try`, `catch`, `amazon`, `basics`];
+    let articles = [`a`, `an`, `with`, `the`, `is`, `for`, `and`, `more`, `in`, `if`, `be`, `to`, `too`, `var`, `try`, `you`, `your`, `function`, `try`, `catch`, `amazon`, `basics`];
     let result = array.filter(item => {
-        if(!item.match(/[!@=[;\]#$%^&*(),.?":{}|<>]/) 
+        if(!item.match(/[!@=[;\]#$%^&*()_^,'’”.\-?":{}|<>]/) 
             & !articles.includes(item.trim().toLowerCase())
             & !item.match(/.*to/)) {
             return item;
@@ -71,6 +95,16 @@ function filterObject(object) {
     let result = {};
     for (const [key, value] of Object.entries(object)) {
         if(value > 1) {
+            result[key] = value;
+        }
+    }
+    return result;
+}
+
+function filterContentDOMObject(object) {
+    let result = {};
+    for (const [key, value] of Object.entries(object)) {
+        if(value > 10 && key.length > 3) {
             result[key] = value;
         }
     }
