@@ -2,7 +2,7 @@ const fetch = require(`isomorphic-fetch`);
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
-const url = `https://www.geisinger.org/health-and-wellness/wellness-articles/2017/10/02/17/07/how-to-have-the-talk-with-your-kids`;
+const url = `https://www.rei.com/blog/camp/how-to-introduce-your-indoorsy-friend-to-the-outdoors/`;
 
 (async function getTopics() {
     let result = [];
