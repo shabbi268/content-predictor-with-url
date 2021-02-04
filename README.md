@@ -22,5 +22,5 @@ This command installs all the dependancy packages required for the project to ru
 This command will execute the function and returns an array of topics for that URL you mentioned.
 
 
-![Alt text](./Brightedge.svg)
+
 <img src="./Brightedge.svg">
