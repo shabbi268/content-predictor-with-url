@@ -16,7 +16,7 @@
 
 Run the below commands
 - npm install
-This command installs all the dependancy packages required for the project to run in the local environment.
+This command installs all the dependency packages required for the project to run in the local environment.
 - open the index.js file and replace the URL const with your url which you want to test.
 - node index.js
 This command will execute the function and returns an array of topics for that URL you mentioned.
